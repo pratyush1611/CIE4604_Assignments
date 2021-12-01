@@ -71,8 +71,8 @@ from dateutil.parser import parse as parsedate
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 #from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d import axes3d
-#from mpl_toolkits.mplot3d import mplot3d
+#from mpl_toolkits.mplot3d import axes3d
+from mpl_toolkits import mplot3d
 from scipy.io import loadmat
 import ssl
 from crsutil import keplerm, ut2gmst, orb2vec, datetime2num, num2datetime, pol2cart
@@ -382,7 +382,7 @@ def tleread(fname, verbose=1):
             argp0 = eval(line2[33:42].lstrip("0"))
             m0 = eval(line2[42:51].lstrip("0"))
             n0 = eval(line2[51:63].lstrip("0"))
-            revnum = eval(line2[64:68].lstrip("0"))
+            revnum = eval(line2[63:68].lstrip("0"))
 
             # Complete orbital elements
             t0 = datetime2num(datetime(year=int(epochyr), month=1, day=1)) + epochdays - 1
@@ -1082,7 +1082,7 @@ def tleplot1(tle, daterange, satid, objcrd=None, figsize=(10,6)):
     ax.view_init(30, 30)   # defaults to -60 (azimuth) and 30 (elevation), rotate by 90 degree to make Delft visible
     ax.set_title('Earth Fixed (ECEF)')
 
-def pltgroundtrack(xsate, satid="", visible=[]):
+def pltgroundtrack(xsate, satid="", visible=[], **kwargs):
     """ Plot satellite ground track(s).
     
     pltgroundtrack(xsate, ...) plot the satellite ground track for a satellite
@@ -1093,8 +1093,8 @@ def pltgroundtrack(xsate, satid="", visible=[]):
     satellite with the longitude and latitude given in the tuple (lon, lat).
     lon and lat must be ndarray with the ECEF longitude and latitude [degrees].
     
-    The function takes two optional parameters, satid and/or visible, with
-    satid the name of the satellite, and visible an optional logical array
+    The function takes optional parameters, satid, visible and/or any matplotlib, 
+    argument, with satid the name of the satellite, and visible an optional logical array
     (of the same shape as lon and lat) with True for the elements where the
     satellite is visible.
 
@@ -1107,7 +1107,7 @@ def pltgroundtrack(xsate, satid="", visible=[]):
 
        plt.figure("Ground tracks")
        pltgroundtrack((sat1, dsat), visible=visible, satid=satid)
-       pltgroundtrack(xsate, satid=satid)
+       pltgroundtrack(xsate, satid=satid,linewidth=0.5)
        plt.title("Ground tracks for two satellites.")
        plt.legend() 
 
@@ -1155,7 +1155,7 @@ def pltgroundtrack(xsate, satid="", visible=[]):
         
     # Plot the ground tracks
     
-    plt.plot(lsatmask, dsatmask, label=satid)
+    plt.plot(lsatmask, dsatmask, label=satid, **kwargs)
     #plt.scatter(lsat, dsat, s=5, label=satid)
     visible = np.array(visible)
     if visible.size > 0:
@@ -1352,8 +1352,9 @@ def plot_orbit_3D(ax, xsat, xobj=None):
     z = Re * np.outer(np.ones(np.size(u)), np.cos(v)) / 1000
 
     # Plot the surface
-    ax.plot_surface(x, y, z, color=[.9, .9, .9], alpha=0.2)
-    ax.plot_wireframe(x, y, z, color='gray', linewidth=0.5)
+    ax.plot_surface(x, y, z, shade=True, edgecolor="gray", linewidth=0.5, color=[.9, .9, .9], alpha=.2)
+    #ax.plot_surface(x, y, z, color=[.9, .9, .9], alpha=0.2)
+    #ax.plot_wireframe(x, y, z, color='gray', linewidth=0.5)
     if type(xobj) in [list, np.array]:
         ax.plot(xobj[:, 0]/1000, xobj[:, 1]/1000, xobj[:, 2]/1000, color='r', linewidth=2, alpha=1)
     ax.plot(xsat[:, 0]/1000, xsat[:, 1]/1000, xsat[:, 2]/1000, color='b', linewidth=2, alpha=1)
